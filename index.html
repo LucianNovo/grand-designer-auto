@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+          html, body{
+            height: 100%; 
+            margin: 0; 
+            padding: 0;
+            overflow: hidden; 
+          }
+          #map-canvas{ 
+            height: 100%; 
+            width:100%; 
+            padding: 0; 
+            position: absolute; 
+            right:0; 
+            top: 0;
+            z-index:-200;
+          }
+          h2{
+            margin-top: 0;
+            font-size:  24;
+          }
+          p{
+            font-size:  18;
+          }
+          ::-webkit-scrollbar { 
+            display: none; 
+          }
+          #circle-menu{
+            display: block;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            text-align:center;
+            display: none;
+          }
+          .location-item{
+            display:inline;
+            display:inline-block;
+            list-style: none;
+            margin: 10px;
+            width: 50px;
+            height: 50px;
+            border: solid;
+            border-color: white;
+            border-width: medium;
+            border-radius: 30px;
+            color:white;
+            font-size: 25px;
+            font-family: "Cubano";
+            text-align: center;
+            line-height: 50px;
+            cursor: s-resize;
+            background-color:rgba(0,0,0,.5);
+          }
+          .location-item :hover{
+            cursor: s-resize;
+          }
+          #portfolio-article{
+            z-index: 3000px;
+            background-color: black;
+            width: 40%;
+            height: 80%;
+            margin-top: 100px;
+            margin-right: 10%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            box-sizing: border-box;
+            box-shadow: 5px 5px 70px black;
+            display: none;
+            border-radius: 5px;
+          }
+          #portfolio-coverPhoto{
+            display: block;
+            position: relative;
+            top: 0px;
+            width: 100%;
+            height: auto;
+          }
+          #portfolio-title{
+            color: white;
+            font-family: 'Cubano';
+            font-size: 36px;
+          }
+          #portfolio-copy{
+            height: 250px;
+            color: white;
+            padding: 40px;
+            line-height: 22px;
+            font-size: 18px;
+            overflow-y:auto;
+          }
+          #portfolio-footer{
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 10%;
+            width: 100%;
+          }
+        #frontMessage{
+            background-color: white;
+            padding: 20px;
+            font-family: 'Edmondsans';
+            font-weight: medium;
+            font-size: 2em;
+            line-height: 1.5;
+            text-align: center;
+            -webkit-text-stroke-color: white;
+
+            z-index: 3000;
+
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+        }
+        #frontMessage :hover{
+            cursor: pointer;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCV6dbzux5FwM0UG3GKnCRGxQmA34EbB0k">
+    </script>
+    <script type="text/javascript">        
+    var map;
+    var conceptStyle, drawingStyle, drawingStyle2, colorStyle,conceptStyleMap,drawingStyleMap,drawingStyle2Map, colorMap, styledMap, styledMap2, mapOptions;
+    function initialize(){
+      // Create an array of styles.
+      drawingStyle = [
+          {
+              "featureType": "landscape",
+              "elementType": "labels",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "transit",
+              "elementType": "labels",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "poi",
+              "elementType": "labels",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "water",
+              "elementType": "labels",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "road",
+              "elementType": "labels.icon",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "stylers": [
+                  {
+                      "hue": "#00aaff"
+                  },
+                  {
+                      "saturation": -100
+                  },
+                  {
+                      "gamma": 2.15
+                  },
+                  {
+                      "lightness": 12
+                  }
+              ]
+          },
+          {
+              "featureType": "road",
+              "elementType": "labels.text.fill",
+              "stylers": [
+                  {
+                      "visibility": "on"
+                  },
+                  {
+                      "lightness": 24
+                  }
+              ]
+          },
+          {
+              "featureType": "road",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "lightness": 57
+                  }
+              ]
+          }
+      ];
+      conceptStyle = [
+          {
+              "featureType": "all",
+              "elementType": "labels.text",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "all",
+              "elementType": "labels.icon",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "administrative.country",
+              "elementType": "geometry.stroke",
+              "stylers": [
+                  {
+                      "visibility": "on"
+                  }
+              ]
+          },
+          {
+              "featureType": "administrative.land_parcel",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "lightness": "-43"
+                  },
+                  {
+                      "saturation": "-62"
+                  },
+                  {
+                      "gamma": "2.81"
+                  }
+              ]
+          },
+          {
+              "featureType": "landscape",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "visibility": "on"
+                  },
+                  {
+                      "lightness": "100"
+                  },
+                  {
+                      "saturation": "-100"
+                  },
+                  {
+                      "gamma": "0.00"
+                  }
+              ]
+          },
+          {
+              "featureType": "poi",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "saturation": "-100"
+                  },
+                  {
+                      "lightness": "100"
+                  }
+              ]
+          },
+          {
+              "featureType": "road",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "saturation": "-100"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.highway",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "lightness": "-28"
+                  },
+                  {
+                      "saturation": "-100"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.arterial",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "lightness": "-9"
+                  },
+                  {
+                      "weight": "0.71"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.local",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "weight": "0.40"
+                  },
+                  {
+                      "lightness": "-4"
+                  },
+                  {
+                      "gamma": "1.00"
+                  }
+              ]
+          },
+          {
+              "featureType": "water",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "lightness": "37"
+                  },
+                  {
+                      "saturation": "37"
+                  },
+                  {
+                      "weight": "1.00"
+                  }
+              ]
+          }
+      ];
+      drawingStyle2 = [
+          {
+              "stylers": [
+                  {
+                      "visibility": "on"
+                  },
+                  {
+                      "saturation": -100
+                  },
+                  {
+                      "gamma": 0.54
+                  }
+              ]
+          },
+          {
+              "featureType": "road",
+              "elementType": "labels.icon",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "water",
+              "stylers": [
+                  {
+                      "color": "#4d4946"
+                  }
+              ]
+          },
+          {
+              "featureType": "poi",
+              "elementType": "labels.icon",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "poi",
+              "elementType": "labels.text",
+              "stylers": [
+                  {
+                      "visibility": "simplified"
+                  }
+              ]
+          },
+          {
+              "featureType": "road",
+              "elementType": "geometry.fill",
+              "stylers": [
+                  {
+                      "color": "#ffffff"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.local",
+              "elementType": "labels.text",
+              "stylers": [
+                  {
+                      "visibility": "simplified"
+                  }
+              ]
+          },
+          {
+              "featureType": "water",
+              "elementType": "labels.text.fill",
+              "stylers": [
+                  {
+                      "color": "#ffffff"
+                  }
+              ]
+          },
+          {
+              "featureType": "transit.line",
+              "elementType": "geometry",
+              "stylers": [
+                  {
+                      "gamma": 0.48
+                  }
+              ]
+          },
+          {
+              "featureType": "transit.station",
+              "elementType": "labels.icon",
+              "stylers": [
+                  {
+                      "visibility": "off"
+                  }
+              ]
+          },
+          {
+              "featureType": "road",
+              "elementType": "geometry.stroke",
+              "stylers": [
+                  {
+                      "gamma": 7.18
+                  }
+              ]
+          }
+      ];
+      colorStyle = [
+          {
+              "featureType": "water",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "hue": "#1CB2BD"
+                  },
+                  {
+                      "saturation": 53
+                  },
+                  {
+                      "lightness": -44
+                  },
+                  {
+                      "visibility": "on"
+                  }
+              ]
+          },
+          {
+              "featureType": "road",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "hue": "#1CB2BD"
+                  },
+                  {
+                      "saturation": 40
+                  }
+              ]
+          },
+          {
+              "featureType": "landscape",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "hue": "#BBDC00"
+                  },
+                  {
+                      "saturation": 80
+                  },
+                  {
+                      "lightness": -20
+                  },
+                  {
+                      "visibility": "on"
+                  }
+              ]
+          },
+          {
+              "featureType": "road.highway",
+              "elementType": "all",
+              "stylers": [
+                  {
+                      "visibility": "on"
+                  }
+              ]
+          }
+      ];
+
+
+      // Create a new StyledMapType object, passing it the array of styles,
+      // as well as the name to be displayed on the map type control.
+      conceptStyleMap = new google.maps.StyledMapType(conceptStyle,
+        {name: "conceptStyle"});
+      drawingStyleMap = new google.maps.StyledMapType(drawingStyle,
+        {name: "drawingStyle"});
+      drawingStyle2Map = new google.maps.StyledMapType(drawingStyle2,
+        {name: "drawingStyle2"});
+      colorStyleMap = new google.maps.StyledMapType(colorStyle,
+        {name: "colorStyle"});
+
+      // Create a map object, and include the MapTypeId to add
+      // to the map type control.
+       mapOptions = {
+        center: new google.maps.LatLng(38.5432734,-121.7539001),
+        disableDefaultUI: true,
+        zoomControl: false,
+        mapTypeControl: false,
+        navigationControl: false,
+        draggable: false,
+        scaleControl: false,
+        scrollwheel: false,
+        streetViewControl: false,
+        zoom: 20,
+        keyboardShortcuts: false,
+        mapTypeControlOptions: {
+          mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'map_style']
+        }
+      };
+      
+      map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+      //Associate the styled map with the MapTypeId and set it to display.
+      map.mapTypes.set('map_style', conceptStyleMap);
+      map.setMapTypeId('map_style');
+        };
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+
+  <body>
+        <ul id="circle-menu">
+          <li class="location-item" onclick="presentArticle('thequad',0);" id="thequad" alt="thequad">Q</li>
+          <li class="location-item" onclick="presentArticle('giedt',180);" id="giedt" alt="giedt">G</li>
+          <li class="location-item" onclick="presentArticle('wright',180);" id="wright" alt="wright">W</li>
+          <li class="location-item" onclick="presentArticle('socialsciences',0);" id="socialsciences" alt="socialsciences">SS</li>
+          <li class="location-item" onclick="presentArticle('mondavi',270);" id="mondavi" alt="mondavi">M</li>
+        </ul>
+
+        <div id="frontMessage" onclick="toEden();">Hi! My name is Lucian and I've been designing in Davis for the last 4 years. I'm all about process- I love taking things from concept...<em>click to continue</em></div>
+
+        <div id="portfolio-article">
+          <img id="portfolio-coverPhoto" src="">
+          <div id="portfolio-copy"></div>
+          <img id="portfolio-footer" src="images/patterns/gradient-01.png">
+        </div>
+
+        <div id="map-canvas"></div>
+        <script type="text/javascript">
+         var clickEvents = {"lastplace":"home"};
+         var locations = { 
+          "thequad":{"lat":38.5419433,"lng":-121.7493832}, 
+          "giedt":{"lat":38.5377558,"lng":-121.7554933},
+          "socialsciences":{"lat":38.5429671,"lng":-121.7478007}, 
+          "wright":{"lat":38.5392118,"lng":-121.7479455}, 
+          "mondavi":{"lat":38.5344535,"lng":-121.7486537}
+         };
+         var framing = {
+           "thequad":[4,-100],
+           "giedt":[5,6],
+           "socialsciences":[4,7],
+           "mondavi":[4,-6],
+           "wright":[3.5,100]
+         };
+         var content = {
+          "thequad":{ 
+            "copy":"<h2>Before I Die</h2><p>Taking Candy Chang's \"Before I Die\" project, we built our own bucket-list forum. We modeled it as a panoramic monolith. Something that could be seen from every angle, and easily understood. Upon completing the project, we open-sourced assembly instructions for other chapters.</p>",
+            "pics":["images/appIcons-export/withText/color_cs6_titlesUnderneath-01.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-02.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-03.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-04.png"],
+            "coverpic": "images/coverPhotos/TEDxUCDavis_InsideOut-photobooth_LKN.jpg"
+            },
+          "giedt":{
+            "copy":"<h2>People Puzzles</h2><p>Each year our attendees submit three passions. Their work, ulterior motivations, beliefs and hobbies. In turn we print these ulterior on their badges to help spark discussion. We thought about these pure interests as a symbol of their being, and used this ‘passion’ datum to represent the community.</p><p>Using nounproject.com we symbolized each unique attendee with an icon. These tokens were laser cut and etched from Douglas Fir. Attendees were given a random token at check-in, and were instructed to find the person who brought that passion-piece. Trading was encouraged and prompted.</p>",
+            "pics":["images/appIcons-export/withText/color_cs6_titlesUnderneath-01.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-02.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-03.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-04.png"],
+            "coverpic": "images/coverPhotos/chalkboards.jpg"
+          },
+          "socialsciences":{
+            "copy":"<h2>Inside Out</h2><p>When we heard about JR's project we knew we had to bring it to campus. Davis is a close knit incubator- we're a bunch of students and associated citizens living in peace.  Amongst our 4-year curriculum there's brotherhood, religion, and friendship. But we take our community for granted. We march through our daily to-dos, only glimpsing at the unique characters around us. Beneath our resting bitch faces there's more- we're expressive, engaging and entertaining. I mean- we're capable of selfies, snapchats and memes, when did we leave face-to-face experiences behind? Inside Out is all about still shots of active character. Face-to-face interaction. Seeing others eye to eye.</p> <p>We knew we had to put that on campus. So with this creed we planned. We found the best place for an installation was Social Sciences. Strangely enough for a humanities building there's absolutely nothing human about it. Towering walls prevent light from getting in. An exterior stairway spirals nowhere. All passageways and paths are misleading . It's rumored that Antoine Predock designed it intending for subjects to get lost. But that's the idea– people greet eachother to ask for direction. SocSci was the perfect representation of our sheltered campus. So when we started asking people for their picture we sought their sincere character. We used the portraits to show friendship and interaction.</p> Our still-life shots play with another. Like this cute couple below. Ultimately, Inside Out is about seeing your friends, your expressions, and seeing yourself.",
+            "pics":["images/appIcons-export/withText/color_cs6_titlesUnderneath-01.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-02.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-03.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-04.png"],
+            "coverpic": "images/coverPhotos/InsideOut_TEDx2014_LucianNovosel_5.jpg"},
+          "wright":{
+            "copy":"<h2>Paper Planes</h2><p>In 2013 our keynote speaker was launching an idea-to-action website. We brought our audience onboard using paper. The project was supposed to involve the public in volunteer projects that were local to Davis. For instance, bike repair stations.</p><p>Near the end of his talk, he instructed the audience to retrieve a piece of paper taped to the underneath their chairs. Our seat-stricken idealists were given a chance to soar. After a hurried moment of writing a countdown was given. A wave of planes soared before arriving on stage. After the show, the ideas went live. We collected and published the ideas online, inaugurating the first 400 ideas and users.</p>",
+            "pics":["images/appIcons-export/withText/color_cs6_titlesUnderneath-01.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-02.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-03.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-04.png"],
+            "coverpic": "images/coverPhotos/TEDxUCDavis_paperPlanes_LKN.jpg"},
+          "mondavi":{
+            "copy":"<h2>Speaking at TEDxUCDavis</h2><p>A chef and a chancellor, a politician and a physicist, engineers and dancers are among the scheduled presenters — sharing “ideas worth spreading” — at the fourth annual TEDxUCDavis conference, set for this Sunday (May 4).</p><p>The conference will be held for the first time at the Mondavi Center for the Performing Arts, the campus’s premiere event venue. Advance ticket purchase is recommended (see details below).</p><p>“Pause or Press Play?” is this year’s theme, exploring the moments in life that require a call to action,</p> and those moments where pause is due. TEDxUCDavis is an offshoot of TED, the 26-year-old, nonprofit   initiative that brings together the world's leading thinkers and doers to spread their ideas. TEDx events are locally organized — by students at UC Davis.</p><p>In previous years, TEDx speakers here have included Madhavi Sunder, talking about intellectual property, fair sharing and culture; Amy Williams, on the frontiers of space; Cliff Saron, on the frontiers of the mind and meditation; and Diane Ullman, on fusing art and science. Click on their names to watch their TEDx presentations.</p>",
+            "pics":["images/appIcons-export/withText/color_cs6_titlesUnderneath-01.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-02.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-03.png","images/appIcons-export/withText/color_cs6_titlesUnderneath-04.png"],
+            "coverpic": "images/coverPhotos/TEDxUCDavis_LucianNovosel-speaking_LKN.jpg"}
+         };
+        
+        var messages = ["from ideologies to concepts", "from drawings to models", "from plans to colors", "from 2D to 3D", "from perspectives to life", "from my life to yours"];
+   
+        function toEden(){
+            // welcome map
+                var transitionTimer = 2000;
+                var transitionTimerCount = 0;
+            //From ideologies TO concepts
+                setTimeout(function(){$("#frontMessage").fadeOut(400);},transitionTimerCount);//0ms in
+                transitionTimerCount = transitionTimerCount+500;
+                setTimeout(function(){$("#frontMessage").text(messages[0]);},transitionTimerCount);//500ms in
+                transitionTimerCount = transitionTimerCount+500;
+                setTimeout(function(){$("#frontMessage").fadeIn(400);},transitionTimerCount);//1000ms in
+                setTimeout(function(){map.mapTypes.set('map_style', drawingStyleMap);}, (transitionTimer));//3000ms in
+                transitionTimerCount = (transitionTimer * 1);
+
+            //From drawings TO models
+                setTimeout(function(){$("#frontMessage").fadeOut(400);},transitionTimerCount);//3000ms in
+                transitionTimerCount = transitionTimerCount+500;
+                setTimeout(function(){$("#frontMessage").text(messages[1]);},transitionTimerCount);//3500ms in
+                transitionTimerCount = transitionTimerCount+500;
+                setTimeout(function(){$("#frontMessage").fadeIn(400);},transitionTimerCount);//4000ms in
+                setTimeout(function(){map.mapTypes.set('map_style', drawingStyle2Map);}, (transitionTimer*2));//6000ms in
+                transitionTimerCount = (transitionTimer * 2);
+
+            //From plans TO color
+                setTimeout(function(){$("#frontMessage").fadeOut(400);},transitionTimerCount);// 6000ms in
+                transitionTimerCount = transitionTimerCount+500;
+                setTimeout(function(){$("#frontMessage").text(messages[2]);},transitionTimerCount);//6500ms in
+                transitionTimerCount = transitionTimerCount+500;
+                setTimeout(function(){$("#frontMessage").fadeIn(400);},transitionTimerCount);//7000ms in
+                setTimeout(function(){map.mapTypes.set('map_style', colorStyleMap);}, (transitionTimer*3));//9000ms in
+                transitionTimerCount = (transitionTimer * 3);
+
+            //From 2D TO 3D
+                setTimeout(function(){$("#frontMessage").fadeOut(400);},transitionTimerCount);// 9000ms in
+                transitionTimerCount = transitionTimerCount+500;
+                setTimeout(function(){$("#frontMessage").text(messages[3]);},transitionTimerCount);//9500ms in
+                transitionTimerCount = transitionTimerCount+500;
+                setTimeout(function(){map.setTilt(0);}, transitionTimerCount);
+                setTimeout(function(){$("#frontMessage").fadeIn(400);},transitionTimerCount);//10000ms in
+                setTimeout(function(){map.setMapTypeId(google.maps.MapTypeId.SATELLITE);}, (transitionTimer*4));//12000ms in
+                transitionTimerCount = (transitionTimer * 4);
+
+            //From perspective TO life 
+                setTimeout(function(){$("#frontMessage").fadeOut(400);},transitionTimerCount);// 12000ms in
+                transitionTimerCount = transitionTimerCount+500;
+                setTimeout(function(){$("#frontMessage").text(messages[4]);},transitionTimerCount);//12500ms in
+                transitionTimerCount = transitionTimerCount+500;
+                setTimeout(function(){$("#frontMessage").fadeIn(400);},transitionTimerCount);//13000ms in
+                setTimeout(function(){map.setTilt(45);}, (transitionTimer*5));//15000ms in
+                transitionTimerCount = (transitionTimer * 5);
+                setTimeout(function(){$("#frontMessage").fadeOut(400);},transitionTimerCount);// 12000ms in
+                setTimeout(function(){$("#frontMessage").text(messages[5]);},transitionTimerCount);
+
+            //From life TO the user
+                setTimeout(function() {map.setHeading(0);}, transitionTimer*5);
+                setTimeout(function() {$("#frontMessage").fadeIn(400);},transitionTimer*5);
+                setTimeout(function() {map.setHeading(90);}, transitionTimer*6);
+                setTimeout(function() {map.setHeading(180);}, transitionTimer*7);
+                setTimeout(function() {map.setHeading(270);}, transitionTimer*8);
+                setTimeout(function() {map.setHeading(0);}, transitionTimer*9);
+                transitionTimerCount = transitionTimer*9;
+
+            //last title before the website
+                setTimeout(function(){$("#frontMessage").fadeOut(400);},transitionTimerCount);
+                setTimeout(function(){map.setTilt(50);map.setZoom(19);$("#circle-menu").fadeIn(600);},transitionTimerCount);
+
+        }
+        $( "#thequad" ).on( "click", function() {
+          presentArticle('thequad',0);
+        });
+        $( "#giedt" ).on( "click", function() {
+          presentArticle('giedt',0);
+        });
+        $( "#wright" ).on( "click", function() {
+          presentArticle('wright',0);
+        });
+        $( "#socialsciences" ).on( "click", function() {
+          presentArticle('socialsciences',0);
+        });
+        $( "#mondavi" ).on( "click", function() {
+          presentArticle('mondavi',0);
+        });
+
+         function presentArticle(articleID,heading){
+            if(clickEvents.lastplace != articleID){        
+              clickEvents.lastplace = articleID;
+              disposeArticle();
+              map.panTo(locations[articleID]);
+              map.setHeading(heading); 
+              setTimeout(function(){
+                frameBuilding(framing[articleID]);
+                exposeArticle(articleID);}
+              , 1500);
+            }
+            else{
+              console.log("already clicked");
+            }
+         };
+         function moveTo(destlocation){
+            map.panTo(destlocation);
+         };
+         function exposeArticle(articleID){
+            $("#portfolio-copy").html(content[articleID]['copy']);
+            $("#portfolio-coverPhoto").attr("src",content[articleID]['coverpic']);
+            $("#portfolio-article").fadeIn('slow');
+         };
+         function disposeArticle(){
+            $("#portfolio-article").fadeOut();
+         };
+         function frameBuilding(frameParams){
+            map.panBy($("#map-canvas").width()/frameParams[0],$("#map-canvas").height()/frameParams[1]);
+         };
+      </script>
+  </body>
+</html>
